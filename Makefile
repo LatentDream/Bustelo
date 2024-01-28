@@ -1,5 +1,5 @@
 TARGET = bustelo
-SRC = main.c
+SRC = list.c
 LIBS = -lm
 
 
