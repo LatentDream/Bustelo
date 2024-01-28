@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "molido.h"
 
 
 
 int main(void) {
-    
+    molido_function(); // Use the declared function
     printf("\nLauching ...");
     const char* fname = "data/avatar.png";
     FILE* fptr;
@@ -23,7 +24,7 @@ int main(void) {
     
     int byte;
     while((byte = fgetc(fptr)) != EOF) {
-        printf("%02X ", byte);
+        // printf("%02X ", byte);
     }
 
     if (ferror(fptr)) {
