@@ -6,10 +6,10 @@
 int main(void) {
     
     printf("\nLauching ...");
-    const char* fname = "./data/avatar.png";
+    const char* fname = "data/avatar.png";
     FILE* fptr;
 
-    fptr = fopen(fname, "r");
+    fptr = fopen(fname, "rb");
 
     if (!fptr) {
         printf("The file is not opened. Aborting the mission");
@@ -21,13 +21,13 @@ int main(void) {
     // Fie Operation
     rewind(fptr);
     
-    int c;
-    while((c = fgetc(fptr) != EOF)) {
-        putchar(c);
+    int byte;
+    while((byte = fgetc(fptr)) != EOF) {
+        printf("%02X ", byte);
     }
 
     if (ferror(fptr)) {
-        printf("I/O Error when reading file");
+        printf("%02X ", byte);  
     } else if(feof(fptr)) {
         printf("\nEnd of file reached successfilly\n\n");
     }
