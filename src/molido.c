@@ -10,35 +10,15 @@
 
 #define MAP_SIZE 256
 
-void writeMapToImage_bak(const char* filename, int map[MAP_SIZE][MAP_SIZE]) {
-    unsigned char* pixels = (unsigned char*)malloc(3 * MAP_SIZE * MAP_SIZE); // 3 colors
 
-    // Convert map data to pixel data
-    for (int y = 0; y < MAP_SIZE; y++) {
-        for (int x = 0; x < MAP_SIZE; x++) {
-            // Assuming your map values are between 0 and 255
-            pixels[3 * (y * MAP_SIZE + x)    ] = (unsigned char)map[y][x]; // Red
-            pixels[3 * (y * MAP_SIZE + x) + 1] = (unsigned char)map[y][x]; // Green
-            pixels[3 * (y * MAP_SIZE + x) + 2] = (unsigned char)map[y][x]; // Blue
-        }
-    }
-
-    // Write pixel data to image file
-    stbi_write_png(filename, MAP_SIZE, MAP_SIZE, 3, pixels, MAP_SIZE * 3);
-    printf("[INFO] Image file %s created\n", filename);
-    free(pixels);
-}
-
-void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE]) {
-
-    const int useLogScale = 1;
+void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE], int isLogScale) {
 
     // Find max
     size_t max = 0;
     for (int i = 0; i < MAP_SIZE; i++) {
         for (int j = 0; j < MAP_SIZE; j++) {
             if (map[i][j] > max) {
-                if (useLogScale) {
+                if (isLogScale) {
                     max = logf(map[i][j]);
                 } else {
                     max = map[i][j];
@@ -52,7 +32,7 @@ void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE]) {
     for (int i = 0; i < MAP_SIZE; i++) {
         for (int j = 0; j < MAP_SIZE; j++) {
             float value;
-            if (useLogScale) {
+            if (isLogScale) {
                 value = logf((float)map[i][j]) / max;
             } else {
                 value = (float)map[i][j] / max;
@@ -63,31 +43,34 @@ void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE]) {
         }
     }
     stbi_write_png(filename, MAP_SIZE, MAP_SIZE, 4, pixels, MAP_SIZE * 3);
+    printf("[INFO] Image file %s created\n", filename);
 }
 
-const char* getExtension(const char* filename) {
-    char* token;
-    const char* extension;
-    token = strrchr(filename, '.');
-    if (token != NULL) {
-        token++;
-        extension = strdup(token);
-        return extension;
-    } else {
-        printf("[ERROR] No extension found for %s\n", filename);
+void parseArgs(int argc, char** argv, char** targetFile, int* isLogScale) {
+
+    // Print all args to the console
+    printf("------ Welcome to Bustelo ------\n");
+    // Check if "log" is passed
+    printf("log: %d\n", *isLogScale);
+    for (int i = 2; i < argc; i++) {
+        if (strcmp(argv[i], "log") == 0) {
+            // Set log scale flag to true
+            *isLogScale = 1;
+        }
+    }
+    // Set the target file
+    if (argc < 2) {
+        printf("[PANIC] No target file is provided\n\n");
         exit(1);
     }
-}
-
-void writeMapToCLI(int map[MAP_SIZE][MAP_SIZE]) {
-    for (int i = 0; i < MAP_SIZE; i++) {
-        for (int j = 0; j < MAP_SIZE; j++) {
-            if (map[i][j]) {
-                printf("*");
-            } else {
-                printf(".");
-            }
-        }
-        printf("\n");
+    *targetFile = argv[1];
+    printf(" Target file: %s\n\n", *targetFile);
+    printf(" Arguments:\n");
+    printf("log: %d\n", *isLogScale);
+    if (*isLogScale) {
+        printf(" [X] log: Enable log scale\n");
+    } else {
+        printf(" [ ] log: Enable log scale\n");
     }
+    printf("--------------------------------\n");
 }

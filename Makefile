@@ -15,7 +15,7 @@ clean:
 	rm -f bin/$(TARGET) bin/$(OBJ)
 
 run:
-	bin/$(TARGET)
+	bin/$(TARGET) data/avatar.png
 
 br:
 	make build && make run

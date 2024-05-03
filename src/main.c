@@ -8,20 +8,19 @@
 // Init the Map
 static int map[MAP_SIZE][MAP_SIZE] = {0};
 
-int main(void) {
-    printf("\n[INFO] Lauching ...\n");
-    const char* fname = "data/FLojoyStudio.exe";
-    const char* extension = getExtension(fname);
+int main(int argc, char** argv) {
+
+    int isLogScale = 0;
+    char* targetFile;
+    parseArgs(argc, argv, &targetFile, &isLogScale);
+
     FILE* fptr;
 
-    fptr = fopen(fname, "rb");
+    fptr = fopen(targetFile, "rb");
     if (!fptr) {
         printf("[ERROR] The file is not opened. Aborting the mission\n");
         exit(0);
     }
-
-    printf("[INFO] We are on the moons!\n");
-
 
     // Fie Operation
     rewind(fptr);
@@ -42,19 +41,15 @@ int main(void) {
 
     if (ferror(fptr)) {
         printf("[ERROR] While reading file: %02X\n", currByte);  
-    } else if(feof(fptr)) {
-        printf("[INFO] End of file reached successfilly\n");
     }
-
-    // Some cleanup
     fclose(fptr);
 
-    const char* base = "output/b_%s.png";
-    int len = snprintf(NULL, 0, base, extension);
+    const char* base = "%s.bustelo.png";
+    int len = snprintf(NULL, 0, base, targetFile);
     char* output = (char*)malloc(len + 1);
-    snprintf(output, len + 1, base, extension);
+    snprintf(output, len + 1, base, targetFile);
 
-    writeMapToImage(output, map);
+    writeMapToImage(output, map, isLogScale);
 
     // Clean up
     free(output);

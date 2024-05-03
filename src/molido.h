@@ -4,9 +4,8 @@
 #define MOLIDO_H
 #define MAP_SIZE 256
 
-void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE]);
-void writeMapToCLI(int map[MAP_SIZE][MAP_SIZE]);
-const char* getExtension(const char* filename);
+void parseArgs(int argc, char** argv, char** targetFile, int* isLogScale);
+void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE], int isLogScale);
 
 #endif // MOLIDO_H
 

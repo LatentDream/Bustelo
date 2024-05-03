@@ -8,5 +8,10 @@ Might never be useful, but great excuse to go back into C after 3 years.
 <img title="x86" alt="x86 output" src="/examples/x86.png">
 <img title="PNG" alt="png output" src="/examples/png.png">
 
+## Usage
+```bash
+bustelo <file>
+```
+
 ## Ressources:
 - This repo contain my own implementation of Christopher Domas Talk: [Youtube](https://www.youtube.com/watch?v=C8--cXwuuFQ)
