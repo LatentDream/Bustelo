@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "molido.h"
@@ -9,7 +10,7 @@ static int map[MAP_SIZE][MAP_SIZE] = {0};
 
 int main(void) {
     printf("\n[INFO] Lauching ...\n");
-    const char* fname = "data/avatar.png";
+    const char* fname = "data/FLojoyStudio.exe";
     const char* extension = getExtension(fname);
     FILE* fptr;
 
@@ -29,26 +30,15 @@ int main(void) {
     int init = 1;
     int prevByte;
     int currByte;
-    int max = 0;
     while((currByte = fgetc(fptr)) != EOF) {
         if (init) {
             prevByte = currByte;
             init = 0;
             continue;
         }
-        map[prevByte][currByte] = 1;
-        if (map[prevByte][currByte] > max) {
-            max = map[prevByte][currByte];
-        }
+        map[prevByte][currByte] += 1;
         prevByte = currByte;
     }
-
-    for (int i = 0; i < MAP_SIZE; i++) {
-        for (int j = 0; j < MAP_SIZE; j++) {
-            map[i][j] = map[i][j] * 255;
-        }
-    }
-
 
     if (ferror(fptr)) {
         printf("[ERROR] While reading file: %02X\n", currByte);  
@@ -65,7 +55,6 @@ int main(void) {
     snprintf(output, len + 1, base, extension);
 
     writeMapToImage(output, map);
-    writeMapToCLI(map);
 
     // Clean up
     free(output);

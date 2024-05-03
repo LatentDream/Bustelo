@@ -1,14 +1,16 @@
 // molido.c
 #include "molido.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
 #define MAP_SIZE 256
 
-void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE]) {
+void writeMapToImage_bak(const char* filename, int map[MAP_SIZE][MAP_SIZE]) {
     unsigned char* pixels = (unsigned char*)malloc(3 * MAP_SIZE * MAP_SIZE); // 3 colors
 
     // Convert map data to pixel data
@@ -27,6 +29,41 @@ void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE]) {
     free(pixels);
 }
 
+void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE]) {
+
+    const int useLogScale = 1;
+
+    // Find max
+    size_t max = 0;
+    for (int i = 0; i < MAP_SIZE; i++) {
+        for (int j = 0; j < MAP_SIZE; j++) {
+            if (map[i][j] > max) {
+                if (useLogScale) {
+                    max = logf(map[i][j]);
+                } else {
+                    max = map[i][j];
+                }
+            }
+        }
+    }
+
+    static uint32_t pixels[MAP_SIZE][MAP_SIZE] = {0};
+    // Normalize the map
+    for (int i = 0; i < MAP_SIZE; i++) {
+        for (int j = 0; j < MAP_SIZE; j++) {
+            float value;
+            if (useLogScale) {
+                value = logf((float)map[i][j]) / max;
+            } else {
+                value = (float)map[i][j] / max;
+            }
+            uint32_t b = value * 255;
+            // Pixel format (RBGA): 0xAABBGGRR
+            pixels[i][j] = 0xFF000000 | b | (b<<8) | (b<<16);
+        }
+    }
+    stbi_write_png(filename, MAP_SIZE, MAP_SIZE, 4, pixels, MAP_SIZE * 3);
+}
 
 const char* getExtension(const char* filename) {
     char* token;
