@@ -35,15 +35,26 @@ int main(void) {
     int init = 1;
     int prevByte;
     int currByte;
+    int max = 0;
     while((currByte = fgetc(fptr)) != EOF) {
-        if (init == 1) {
+        if (init) {
             prevByte = currByte;
             init = 0;
             continue;
         }
         map[prevByte][currByte] += 1;
+        if (map[prevByte][currByte] > max) {
+            max = map[prevByte][currByte];
+        }
         prevByte = currByte;
     }
+
+    for (int i = 0; i < MAP_SIZE; i++) {
+        for (int j = 0; j < MAP_SIZE; j++) {
+            map[i][j] = map[i][j] * 256 / max;
+        }
+    }
+
 
     if (ferror(fptr)) {
         printf("[ERROR] While reading file: %02X\n", currByte);  
