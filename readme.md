@@ -21,5 +21,16 @@ PNF file:
 bustelo <file>
 ```
 
+Dev - Win x86:
+1. Install Raylib & W64DevKit system wise: [Guide](https://github.com/raysan5/raylib/wiki/Working-on-Windows)
+2. Don't forget to lauch the Shell
+```bash
+C:\w64devkit\w64devkit.exe
+```
+3. Compile the project & run it
+```bash
+make br
+```
+
 ## Ressources:
 - This repo contain my own implementation of Christopher Domas Talk: [Youtube](https://www.youtube.com/watch?v=C8--cXwuuFQ)
