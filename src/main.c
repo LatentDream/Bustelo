@@ -51,7 +51,7 @@ int main(void) {
 
     for (int i = 0; i < MAP_SIZE; i++) {
         for (int j = 0; j < MAP_SIZE; j++) {
-            map[i][j] = map[i][j] * 256 / max;
+            map[i][j] = map[i][j] * 255 / max;
         }
     }
 
@@ -65,7 +65,7 @@ int main(void) {
     // Some cleanup
     fclose(fptr);
 
-    const char* base = "output/out_%s.png";
+    const char* base = "output/output_%s.png";
     int len = snprintf(NULL, 0, base, extension);
     char* output = (char*)malloc(len + 1);
     snprintf(output, len + 1, base, extension);
