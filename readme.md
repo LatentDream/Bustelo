@@ -4,8 +4,16 @@ CLI to help find the file type of a binary and visualize it.
 Might never be useful, but great excuse to go back into C after 3 years.
 
 ## Example
+Bitmap file:
+
 <img title="Bitmap" alt="Bitmap output" src="/examples/bmp.png">
+
+x86 file:
+
 <img title="x86" alt="x86 output" src="/examples/x86.png">
+
+PNF file:
+
 <img title="PNG" alt="png output" src="/examples/png.png">
 
 ## Usage
