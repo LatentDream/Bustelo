@@ -7,13 +7,12 @@
 
 
 int main(void) {
-    molido_function(); // Use the declared function
     printf("\n[INFO] Lauching ...\n");
     const char* fname = "data/avatar.png";
+    const char* extension = getExtension(fname);
     FILE* fptr;
 
     fptr = fopen(fname, "rb");
-
     if (!fptr) {
         printf("[ERROR] The file is not opened. Aborting the mission\n");
         exit(0);
@@ -43,6 +42,7 @@ int main(void) {
             continue;
         }
         map[prevByte][currByte] += 1;
+        prevByte = currByte;
     }
 
     if (ferror(fptr)) {
@@ -54,8 +54,17 @@ int main(void) {
     // Some cleanup
     fclose(fptr);
 
-    writeMapToImage("output/map.png", map);
-    
+    const char* base = "output/out_%s.png";
+    int len = snprintf(NULL, 0, base, extension);
+    char* output = (char*)malloc(len + 1);
+    snprintf(output, len + 1, base, extension);
+
+    writeMapToImage(output, map);
+
+    // Clean up
+    free(output);
+    printf("\n");
+
     return 0;
 }
 

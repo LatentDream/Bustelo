@@ -1,15 +1,12 @@
 // molido.c
 #include "molido.h"
 #include <stdio.h>
+#include <string.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
 #define MAP_SIZE 256
-
-void molido_function() {
-    printf("[INFO] Hello from molido.c\n");
-}
 
 void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE]) {
     unsigned char* pixels = (unsigned char*)malloc(3 * MAP_SIZE * MAP_SIZE); // 3 colors
@@ -26,7 +23,21 @@ void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE]) {
 
     // Write pixel data to image file
     stbi_write_png(filename, MAP_SIZE, MAP_SIZE, 3, pixels, MAP_SIZE * 3);
+    printf("[INFO] Image file %s created\n", filename);
     free(pixels);
 }
 
 
+const char* getExtension(const char* filename) {
+    char* token;
+    const char* extension;
+    token = strrchr(filename, '.');
+    if (token != NULL) {
+        token++;
+        extension = strdup(token);
+        return extension;
+    } else {
+        printf("[ERROR] No extension found for %s\n", filename);
+        exit(1);
+    }
+}
