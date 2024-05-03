@@ -41,3 +41,16 @@ const char* getExtension(const char* filename) {
         exit(1);
     }
 }
+
+void writeMapToCLI(int map[MAP_SIZE][MAP_SIZE]) {
+    for (int i = 0; i < MAP_SIZE; i++) {
+        for (int j = 0; j < MAP_SIZE; j++) {
+            if (map[i][j]) {
+                printf("*");
+            } else {
+                printf(".");
+            }
+        }
+        printf("\n");
+    }
+}
