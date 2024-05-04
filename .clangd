@@ -1,0 +1,2 @@
+CompileFlags:
+  Add: -I C:/w64devkit/include
