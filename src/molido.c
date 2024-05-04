@@ -9,33 +9,47 @@
 #define MAP_SIZE 256
 
 
-void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE], int isLogScale) {
+void normaliseMap(MapType* map, int isLogScale) {
 
     // Find max
     int max = 0;
     for (int i = 0; i < MAP_SIZE; i++) {
         for (int j = 0; j < MAP_SIZE; j++) {
-            if (map[i][j] > max) {
+            if ((*map)[i][j] > max) {
                 if (isLogScale) {
-                    max = logf(map[i][j]);
+                    max = logf((*map)[i][j]);
                 } else {
-                    max = map[i][j];
+                    max = (*map)[i][j];
                 }
             }
         }
     }
 
-    static uint32_t pixels[MAP_SIZE][MAP_SIZE] = {0};
     // Normalize the map
     for (int i = 0; i < MAP_SIZE; i++) {
         for (int j = 0; j < MAP_SIZE; j++) {
             float value;
             if (isLogScale) {
-                value = logf((float)map[i][j]) / max;
+                value = logf((float)(*map)[i][j]) / max;
             } else {
-                value = (float)map[i][j] / max;
+                value = (float)(*map)[i][j] / max;
             }
-            uint32_t b = value * 255;
+            (*map)[i][j] = value * 255;
+        }
+    }
+
+}
+
+
+void writeMapToImage(const char* filename, MapType* normalizedMap) {
+    // Write a map to a png file
+    // Expect the map to be already normalize (int value between 0 & 255
+
+    static uint32_t pixels[MAP_SIZE][MAP_SIZE] = {0};
+    // Normalize the map
+    for (int i = 0; i < MAP_SIZE; i++) {
+        for (int j = 0; j < MAP_SIZE; j++) {
+            uint32_t b = (*normalizedMap)[i][j];
             // Pixel format (RBGA): 0xAABBGGRR
             pixels[i][j] = 0xFF000000 | b | (b<<8) | (b<<16);
         }
@@ -43,6 +57,7 @@ void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE], int isLo
     stbi_write_png(filename, MAP_SIZE, MAP_SIZE, 4, pixels, MAP_SIZE * 3);
     printf("[INFO] Image file %s created\n", filename);
 }
+
 
 void parseArgs(int argc, char** argv, char** targetFile, int* isLogScale, int* startGui ) {
 

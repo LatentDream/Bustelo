@@ -3,10 +3,10 @@
 #include "raymath.h"
 #include "logger.h"
 #include <stdio.h>
+#include "molido.h"
 
 #define MAX_FILEPATH_RECORDED   1
 #define MAX_FILEPATH_SIZE       2048
-
 
 // App Screens
 typedef enum UIScreen {
@@ -30,20 +30,21 @@ int launchUIEventLoop() {
     
     // Select file page ------------------------
     int filePathCounter = 0;
-    char *filePaths[MAX_FILEPATH_RECORDED] = { 0 };
+    char* filePaths[MAX_FILEPATH_RECORDED] = { 0 };
     for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
         // Allocate space for the required file paths
         filePaths[i] = (char *)RL_CALLOC(MAX_FILEPATH_SIZE, 1);
     }
+    MapType maps[MAX_FILEPATH_RECORDED] = {0};
 
     // Viewer page ------------------------------
+    int currentFile = 0;
     Camera2D camera = { 0 };
     camera.zoom = 1.0f;
     int frameCounter = 0;
 
     // Error page -------------------------------
     char* errorMessage = "";
-
 
     // Main app loop ============================
     while (!WindowShouldClose()) {
@@ -74,7 +75,11 @@ int launchUIEventLoop() {
             case PROCESSOR:
                 frameCounter++;
                 // TODO: Run in a different thread - Current implementation is blocking
-
+                // Action take almost no delay for now
+                for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
+                    printf("[INFO] Processing: %s\n", filePaths[i]);
+                    fillMap(filePaths[i], &(maps[i]));
+                }
                 currentScreen = VIEWER;
 
                 break;
