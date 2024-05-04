@@ -1,12 +1,10 @@
 // molido.c
 #include "molido.h"
+#include "stb_image_write.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
 
 #define MAP_SIZE 256
 
@@ -14,7 +12,7 @@
 void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE], int isLogScale) {
 
     // Find max
-    size_t max = 0;
+    int max = 0;
     for (int i = 0; i < MAP_SIZE; i++) {
         for (int j = 0; j < MAP_SIZE; j++) {
             if (map[i][j] > max) {

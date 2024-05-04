@@ -10,7 +10,7 @@
 // Init the Map
 static int map[MAP_SIZE][MAP_SIZE] = {0};
 
-int main(int argc, char** argv) {
+int cli(int argc, char** argv) {
 
     int isLogScale = 0;
     char* targetFile;
