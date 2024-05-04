@@ -32,5 +32,15 @@ C:\w64devkit\w64devkit.exe
 make br
 ```
 
+WIP: Updating to [Misha's Makefile magic](https://github.com/KRMisha/Makefile)
+```bash
+git-bash$ mingw32-make
+```
+
+Dev - Linux:
+```bash
+make
+```
+
 ## Ressources:
 - This repo contain my own implementation of Christopher Domas Talk: [Youtube](https://www.youtube.com/watch?v=C8--cXwuuFQ)

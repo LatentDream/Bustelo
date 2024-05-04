@@ -5,10 +5,6 @@
 
 #define MAP_SIZE 256
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
-
-
 // Init the Map
 static int map[MAP_SIZE][MAP_SIZE] = {0};
 
@@ -61,5 +57,4 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-
 

@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
 #define MAP_SIZE 256
