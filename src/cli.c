@@ -12,34 +12,7 @@ static int map[MAP_SIZE][MAP_SIZE] = {0};
 
 int launchCLI(char* targetFile, int isLogScale) {
 
-    FILE* fptr;
-    fptr = fopen(targetFile, "rb");
-    if (!fptr) {
-        printf("[ERROR] The file is not opened. Aborting the mission\n");
-        exit(0);
-    }
-
-    // Fie Operation
-    rewind(fptr);
-    
-    // Traverse the file
-    int init = 1;
-    int prevByte;
-    int currByte;
-    while((currByte = fgetc(fptr)) != EOF) {
-        if (init) {
-            prevByte = currByte;
-            init = 0;
-            continue;
-        }
-        map[prevByte][currByte] += 1;
-        prevByte = currByte;
-    }
-
-    if (ferror(fptr)) {
-        printf("[ERROR] While reading file: %02X\n", currByte);  
-    }
-    fclose(fptr);
+    fillMap(targetFile, &map);
 
     const char* base = "%s.bustelo.png";
     int len = snprintf(NULL, 0, base, targetFile);

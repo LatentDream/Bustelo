@@ -77,3 +77,37 @@ void parseArgs(int argc, char** argv, char** targetFile, int* isLogScale, int* s
     }
     printf("--------------------------------\n");
 }
+
+
+void fillMap(char* targetFile, MapType* map) {
+
+    FILE* fptr;
+    fptr = fopen(targetFile, "rb");
+    if (!fptr) {
+        printf("[ERROR] The file is not opened. Aborting the mission\n");
+        exit(0);
+    }
+
+    // Fie Operation
+    rewind(fptr);
+    
+    // Traverse the file
+    int init = 1;
+    int prevByte;
+    int currByte;
+    while((currByte = fgetc(fptr)) != EOF) {
+        if (init) {
+            prevByte = currByte;
+            init = 0;
+            continue;
+        }
+        (*map)[prevByte][currByte] += 1;
+        prevByte = currByte;
+    }
+
+    if (ferror(fptr)) {
+        printf("[ERROR] While reading file: %02X\n", currByte);  
+    }
+    fclose(fptr);
+
+}

@@ -2,6 +2,7 @@
 #include "rlgl.h"
 #include "raymath.h"
 #include "logger.h"
+#include <stdio.h>
 
 #define MAX_FILEPATH_RECORDED   1
 #define MAX_FILEPATH_SIZE       2048
@@ -54,7 +55,7 @@ int launchUIEventLoop() {
                     FilePathList droppedFiles = LoadDroppedFiles();
                     for (int i = 0, offset = filePathCounter; i < (int)droppedFiles.count; i++) {
                         if (filePathCounter < (MAX_FILEPATH_RECORDED)) {
-                            print("[INFO]: Loading %s", filePaths[offset + i]);
+                            printf("[INFO]: Loading %s", filePaths[offset + i]);
                             TextCopy(filePaths[offset + i], droppedFiles.paths[i]);
                             filePathCounter++;
                         } else {
@@ -66,19 +67,16 @@ int launchUIEventLoop() {
                 }
 
                 if (IsKeyPressed(KEY_ENTER) && filePathCounter > 0) {
-                    // TODO: Open File Dialog
-                    // file = OpenFileDialog("Select a file", NULL);
-                    // currentScreen = PROCESSOR;
-                    currentScreen = VIEWER;
+                    currentScreen = PROCESSOR;
                 }
                 break;
 
             case PROCESSOR:
                 frameCounter++;
-                // TODO: Actualy process the file
-                if (frameCounter > 120) {
-                    currentScreen = VIEWER;
-                }
+                // TODO: Run in a different thread - Current implementation is blocking
+
+                currentScreen = VIEWER;
+
                 break;
 
             case VIEWER:
