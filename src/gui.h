@@ -1,3 +1,3 @@
 #include "raylib.h"
 
-int launchUI();
+int launchUIEventLoop();

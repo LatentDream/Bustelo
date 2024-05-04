@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     parseArgs(argc, argv, &targetFile, &isLogScale, &startGui);
 
     if (startGui) {
-        return launchUI();
+        return launchUIEventLoop();
     } else {
         return launchCLI(targetFile, isLogScale);
     }
