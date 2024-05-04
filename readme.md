@@ -19,7 +19,7 @@ PNF file:
 ## Usage
 ```bash
 bustelo <file>  # CLI mode
-busoto --gui    # GUI mode
+bustelo --gui   # GUI mode
 ```
 
 ## Dev - Setup
