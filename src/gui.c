@@ -1,6 +1,6 @@
 #include "raylib.h"
 
-int StartUI() {
+int launchUI() {
 
     const int screenWidth = 800;
     const int screenHeight = 450;

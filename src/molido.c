@@ -44,16 +44,21 @@ void writeMapToImage(const char* filename, int map[MAP_SIZE][MAP_SIZE], int isLo
     printf("[INFO] Image file %s created\n", filename);
 }
 
-void parseArgs(int argc, char** argv, char** targetFile, int* isLogScale) {
+void parseArgs(int argc, char** argv, char** targetFile, int* isLogScale, int* startGui ) {
 
     // Print all args to the console
     printf("------ Welcome to Bustelo ------\n");
     // Check if "log" is passed
-    printf("log: %d\n", *isLogScale);
-    for (int i = 2; i < argc; i++) {
+    for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "log") == 0) {
             // Set log scale flag to true
             *isLogScale = 1;
+        }
+        if (strcmp(argv[i], "--gui") == 0) {
+            // Set log scale flag to true
+            printf("GELOOO\n");
+            *startGui = 1;
+            return;
         }
     }
     // Set the target file
@@ -62,9 +67,9 @@ void parseArgs(int argc, char** argv, char** targetFile, int* isLogScale) {
         exit(1);
     }
     *targetFile = argv[1];
+    printf(" To launch the GUI, pass --gui (other parameter will be ignore\n");
     printf(" Target file: %s\n\n", *targetFile);
     printf(" Arguments:\n");
-    printf("log: %d\n", *isLogScale);
     if (*isLogScale) {
         printf(" [X] log: Enable log scale\n");
     } else {

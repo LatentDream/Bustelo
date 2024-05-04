@@ -18,29 +18,28 @@ PNF file:
 
 ## Usage
 ```bash
-bustelo <file>
+bustelo <file>  # CLI mode
+busoto --gui    # GUI mode
 ```
 
-Dev - Win x86:
-1. Install Raylib & W64DevKit system wise: [Guide](https://github.com/raysan5/raylib/wiki/Working-on-Windows)
-2. Don't forget to lauch the Shell
+## Dev - Setup
+**Win x86**
+Install Raylib & W64DevKit system wise: [Guide](https://github.com/raysan5/raylib/wiki/Working-on-Windows)
 ```bash
+# Launch the Shell with the devkit
 C:\w64devkit\w64devkit.exe
-```
-3. Compile the project & run it
-```bash
-make br
-```
 
-WIP: Updating to [Misha's Makefile magic](https://github.com/KRMisha/Makefile)
-```bash
-git-bash$ mingw32-make
+# Compile the project & run it (on git-bash - Not in the same shell)
+mingw32-make
 ```
 
 Dev - Linux:
+Insall Raylib system wise
 ```bash
 make
 ```
 
 ## Ressources:
 - This repo contain my own implementation of Christopher Domas Talk: [Youtube](https://www.youtube.com/watch?v=C8--cXwuuFQ)
+- Project Template: [Misha's Makefile magic](https://github.com/KRMisha/Makefile)
+- Adapted for C for my own need

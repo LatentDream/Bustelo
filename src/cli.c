@@ -10,14 +10,9 @@
 // Init the Map
 static int map[MAP_SIZE][MAP_SIZE] = {0};
 
-int cli(int argc, char** argv) {
-
-    int isLogScale = 0;
-    char* targetFile;
-    parseArgs(argc, argv, &targetFile, &isLogScale);
+int launchCLI(char* targetFile, int isLogScale) {
 
     FILE* fptr;
-
     fptr = fopen(targetFile, "rb");
     if (!fptr) {
         printf("[ERROR] The file is not opened. Aborting the mission\n");
