@@ -3,6 +3,7 @@
 #include "raymath.h"
 #include "logger.h"
 #include <stdio.h>
+#include <stdint.h>
 #include "molido.h"
 
 #define MAX_FILEPATH_RECORDED   1
@@ -100,7 +101,7 @@ int launchUIEventLoop() {
                 for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
                     printf("[INFO] Processing: %s\n", filePaths[i]);
                     fillMap(filePaths[i], &(maps[i]));
-                    normaliseMap(&(maps[currentFile]), 0);  // TODO: Introduce settings
+                    normaliseMap(&(maps[currentFile]), 1);  // TODO: Introduce settings
                 }
                 currentScreen = VIEWER;
 
@@ -116,14 +117,9 @@ int launchUIEventLoop() {
                 // Zoom based on mouse wheel
                 float wheel = GetMouseWheelMove();
                 if (wheel != 0) {
-                    // Get the world point that is under the mouse
                     Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), camera);
-                    // Set the offset to where the mouse is
                     camera.offset = GetMousePosition();
-                    // Set the target to match, so that the camera maps the world space point 
-                    // under the cursor to the screen space point under the cursor at any zoom
                     camera.target = mouseWorldPos;
-                    // Zoom increment
                     const float zoomIncrement = 0.125f;
                     camera.zoom += (wheel*zoomIncrement);
                     if (camera.zoom < zoomIncrement) camera.zoom = zoomIncrement;
@@ -165,20 +161,19 @@ int launchUIEventLoop() {
                 break;
 
             case VIEWER:
-                ClearBackground(BLACK);
+                ClearBackground(LIGHTGRAY);
                 BeginMode2D(camera);
 
                     MapType* currMap = &maps[currentFile];             
                     for (int i = 0; i < MAP_SIZE; i++) {
                         for (int j = 0; j < MAP_SIZE; j++) {
-                            Color c;
-                            if ((*currMap)[i][j] > 26) {
-                                c = SKYBLUE;
-                            } else {
-                                c = RED;
-                            }
-                            DrawRectangle(i + TILE_SIZE, j + TILE_SIZE, TILE_SIZE, TILE_SIZE, c);
-
+                            uint32_t b = (*currMap)[i][j];
+                            Color recColor;
+                            recColor.r = (b >> 16) & 0xFF;
+                            recColor.g = (b >> 8) & 0xFF;
+                            recColor.b = b & 0xFF;
+                            recColor.a = 255; 
+                            DrawRectangle(i + TILE_SIZE, j + TILE_SIZE, TILE_SIZE, TILE_SIZE, recColor);
                         }
                     }
                     
