@@ -18,6 +18,27 @@ typedef enum UIScreen {
 } GameScreen;
 
 
+// TO TEST SOME STUFF ===========================================================
+#define GRID_SIZE 100
+#define TILE_SIZE 50
+void DrawGridBackground() {
+    const int tile_size = 50;
+    for (int i = -GRID_SIZE; i < GRID_SIZE; i ++) {
+        DrawLineEx((Vector2){GRID_SIZE * TILE_SIZE, TILE_SIZE*i}, (Vector2){-GRID_SIZE * TILE_SIZE, TILE_SIZE*i}, 1, GRAY);
+        DrawLineEx((Vector2){TILE_SIZE*i, GRID_SIZE * TILE_SIZE}, (Vector2){TILE_SIZE*i, -GRID_SIZE * TILE_SIZE}, 1, GRAY);
+    }
+}
+void draw_axis(){
+    DrawLineEx((Vector2){GRID_SIZE * TILE_SIZE, 0}, (Vector2){-GRID_SIZE * TILE_SIZE, 0}, 2, BLACK);
+    DrawLineEx((Vector2){0, GRID_SIZE * TILE_SIZE}, (Vector2){0, -GRID_SIZE * TILE_SIZE}, 2, BLACK);
+    for (int i = -GRID_SIZE; i < GRID_SIZE; i ++) {
+        DrawText(TextFormat("%d", i * TILE_SIZE), i * TILE_SIZE + 5, 5, 5, BLACK);
+        DrawText(TextFormat("%d", i * TILE_SIZE),5,  i * TILE_SIZE + 5, 5, BLACK);
+    }
+}
+// =============================================================================
+
+
 int launchUIEventLoop() {
 
     // Initialization ==========================
@@ -79,12 +100,14 @@ int launchUIEventLoop() {
                 for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
                     printf("[INFO] Processing: %s\n", filePaths[i]);
                     fillMap(filePaths[i], &(maps[i]));
+                    normaliseMap(&(maps[currentFile]), 0);  // TODO: Introduce settings
                 }
                 currentScreen = VIEWER;
 
                 break;
 
             case VIEWER:
+                // TODO: Listen for Esp and if it happen -> Reset state + Go to menu
                 if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
                     Vector2 delta = GetMouseDelta();
                     delta = Vector2Scale(delta, -1.0f/camera.zoom);
@@ -123,7 +146,6 @@ int launchUIEventLoop() {
                     DrawText("PRESS ENTER TO PROCESS THE FILES", 120, 220, 20, DARKGREEN);
                 }
                 ClearBackground(RAYWHITE);
-
                 if (filePathCounter == 0) {
                     DrawText("Drop your files to this window!", 100, 40, 20, DARKGRAY);
                 } else {
@@ -145,17 +167,20 @@ int launchUIEventLoop() {
             case VIEWER:
                 ClearBackground(BLACK);
                 BeginMode2D(camera);
-                    // Draw the 3d grid, rotated 90 degrees and centered around 0,0 
-                    // TODO: Fill the grid with the data from the result of the Molido process
-                    rlPushMatrix();
-                        rlTranslatef(0, 25*50, 0);
-                        rlRotatef(90, 1, 0, 0);
-                        DrawGrid(100, 50);
-                    rlPopMatrix();
 
-                    // Vizual Reference
-                    Rectangle rect = { 0, 0, 100, 100 };
-                    DrawRectangleRec(rect, SKYBLUE);
+                    MapType* currMap = &maps[currentFile];             
+                    for (int i = 0; i < MAP_SIZE; i++) {
+                        for (int j = 0; j < MAP_SIZE; j++) {
+                            Color c;
+                            if ((*currMap)[i][j] > 26) {
+                                c = SKYBLUE;
+                            } else {
+                                c = RED;
+                            }
+                            DrawRectangle(i + TILE_SIZE, j + TILE_SIZE, TILE_SIZE, TILE_SIZE, c);
+
+                        }
+                    }
                     
                 EndMode2D();
                 DrawText("Mouse right button drag to move, mouse wheel to zoom", 10, 10, 20, WHITE);
@@ -164,7 +189,7 @@ int launchUIEventLoop() {
             case ERROR_PAGE:
                 ClearBackground(RAYWHITE);
                 DrawText("ERROR", 700, 10, 20, RED);
-                DrawText(errorMessage, 20, 20, 20, BLACK);
+                DrawText(errorMessage, screenWidth/2, screenHeight/2, 20, BLACK);
                 DrawRectangle(0, 0, screenWidth, 5, RED);
                 DrawRectangle(0, 5, 5, screenHeight - 10, RED);
                 DrawRectangle(screenWidth - 5, 5, 5, screenHeight - 10, RED);
