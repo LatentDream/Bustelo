@@ -6,9 +6,6 @@
 #include <stdint.h>
 #include "molido.h"
 
-#define MAX_FILEPATH_RECORDED   1
-#define MAX_FILEPATH_SIZE       2048
-
 // App Screens
 typedef enum UIScreen {
     MAIN_MENU,
@@ -19,30 +16,28 @@ typedef enum UIScreen {
 } GameScreen;
 
 
-// TO TEST SOME STUFF ===========================================================
-#define GRID_SIZE 100
-#define TILE_SIZE 50
-void DrawGridBackground() {
-    const int tile_size = 50;
-    for (int i = -GRID_SIZE; i < GRID_SIZE; i ++) {
-        DrawLineEx((Vector2){GRID_SIZE * TILE_SIZE, TILE_SIZE*i}, (Vector2){-GRID_SIZE * TILE_SIZE, TILE_SIZE*i}, 1, GRAY);
-        DrawLineEx((Vector2){TILE_SIZE*i, GRID_SIZE * TILE_SIZE}, (Vector2){TILE_SIZE*i, -GRID_SIZE * TILE_SIZE}, 1, GRAY);
-    }
-}
-void draw_axis(){
-    DrawLineEx((Vector2){GRID_SIZE * TILE_SIZE, 0}, (Vector2){-GRID_SIZE * TILE_SIZE, 0}, 2, BLACK);
-    DrawLineEx((Vector2){0, GRID_SIZE * TILE_SIZE}, (Vector2){0, -GRID_SIZE * TILE_SIZE}, 2, BLACK);
-    for (int i = -GRID_SIZE; i < GRID_SIZE; i ++) {
-        DrawText(TextFormat("%d", i * TILE_SIZE), i * TILE_SIZE + 5, 5, 5, BLACK);
-        DrawText(TextFormat("%d", i * TILE_SIZE),5,  i * TILE_SIZE + 5, 5, BLACK);
-    }
-}
+// Files Handler ================================================================
+#define MAX_FILEPATH_RECORDED   1
+#define MAX_FILEPATH_SIZE       2048
+typedef struct {
+    int filepathCounter;
+    char* filepaths[MAX_FILEPATH_RECORDED];
+    MapType maps[MAX_FILEPATH_RECORDED];
+    MapType originalMaps[MAX_FILEPATH_RECORDED];
+} FilesHandler;
+
+// Declaration of functions
+void InitFileHandler(FilesHandler* fh);
+void ResetFilesHandler(FilesHandler* fh);
+void FreeFilesHandler(FilesHandler* fh);
+
 // =============================================================================
+#define TILE_SIZE 50
 
 
 int launchUIEventLoop() {
 
-    // Initialization ==========================
+    // Initialization ==========================================================
     GameScreen currentScreen = MAIN_MENU;
     const int screenWidth = 800;
     const int screenHeight = 650;
@@ -51,13 +46,8 @@ int launchUIEventLoop() {
     SetTargetFPS(60);
     
     // Select file page ------------------------
-    int filePathCounter = 0;
-    char* filePaths[MAX_FILEPATH_RECORDED] = { 0 };
-    for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
-        // Allocate space for the required file paths
-        filePaths[i] = (char *)RL_CALLOC(MAX_FILEPATH_SIZE, 1);
-    }
-    MapType maps[MAX_FILEPATH_RECORDED] = {0};
+    FilesHandler fh;
+    InitFileHandler(&fh);
 
     // Viewer page ------------------------------
     int currentFile = 0;
@@ -71,16 +61,16 @@ int launchUIEventLoop() {
     // Main app loop ============================
     while (!WindowShouldClose()) {
 
-        // Update ===============================
+        // Update ===============================================================
         switch(currentScreen) {
             case MAIN_MENU:
                 if (IsFileDropped()) {
                     FilePathList droppedFiles = LoadDroppedFiles();
-                    for (int i = 0, offset = filePathCounter; i < (int)droppedFiles.count; i++) {
-                        if (filePathCounter < (MAX_FILEPATH_RECORDED)) {
-                            printf("[INFO]: Loading %s", filePaths[offset + i]);
-                            TextCopy(filePaths[offset + i], droppedFiles.paths[i]);
-                            filePathCounter++;
+                    for (int i = 0, offset = fh.filepathCounter; i < (int)droppedFiles.count; i++) {
+                        if (fh.filepathCounter < (MAX_FILEPATH_RECORDED)) {
+                            printf("[INFO]: Loading %s", fh.filepaths[offset + i]);
+                            TextCopy(fh.filepaths[offset + i], droppedFiles.paths[i]);
+                            fh.filepathCounter++;
                         } else {
                             currentScreen = ERROR_PAGE;
                             errorMessage = "Exceded the maximum number of file that can be processed";
@@ -89,26 +79,30 @@ int launchUIEventLoop() {
                     UnloadDroppedFiles(droppedFiles);
                 }
 
-                if (IsKeyPressed(KEY_ENTER) && filePathCounter > 0) {
+                if (IsKeyPressed(KEY_ENTER) && fh.filepathCounter > 0) {
                     currentScreen = PROCESSOR;
                 }
                 break;
 
             case PROCESSOR:
                 frameCounter++;
-                // TODO: Run in a different thread - Current implementation is blocking
+                // WARN: Current implementation is blocking
                 // Action take almost no delay for now
                 for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
-                    printf("[INFO] Processing: %s\n", filePaths[i]);
-                    fillMap(filePaths[i], &(maps[i]));
-                    normaliseMap(&(maps[currentFile]), 1);  // TODO: Introduce settings
+                    printf("[INFO] Processing: %s\n", fh.filepaths[i]);
+                    fillMap(fh.filepaths[i], &(fh.maps[i]));
+                    normaliseMap(&(fh.maps[currentFile]), 1);  // TODO: Introduce settings
                 }
                 currentScreen = VIEWER;
 
                 break;
 
             case VIEWER:
-                // TODO: Listen for Esp and if it happen -> Reset state + Go to menu
+                if (IsKeyPressed(KEY_Q)) {
+                    ResetFilesHandler(&fh);
+                    currentScreen = MAIN_MENU;
+                    break;
+                }
                 if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
                     Vector2 delta = GetMouseDelta();
                     delta = Vector2Scale(delta, -1.0f/camera.zoom);
@@ -128,30 +122,34 @@ int launchUIEventLoop() {
 
             case ERROR_PAGE:
                 // TODO: Reset all states send to initial Menu
+                if (IsKeyPressed(KEY_ENTER)) {
+                    ResetFilesHandler(&fh);
+                    currentScreen = MAIN_MENU;
+                }
                 break;
 
             default:
                 break;
         }
 
-        // Draw Current Frame ==================
+        // Draw Current Frame ==================================================
         BeginDrawing();
         switch(currentScreen) {
             case MAIN_MENU:
-                if (filePathCounter > 0) {
+                if (fh.filepathCounter > 0) {
                     DrawText("PRESS ENTER TO PROCESS THE FILES", 120, 220, 20, DARKGREEN);
                 }
                 ClearBackground(RAYWHITE);
-                if (filePathCounter == 0) {
+                if (fh.filepathCounter == 0) {
                     DrawText("Drop your files to this window!", 100, 40, 20, DARKGRAY);
                 } else {
                     DrawText("Dropped files:", 100, 40, 20, DARKGRAY);
-                    for (int i = 0; i < filePathCounter; i++) {
+                    for (int i = 0; i < fh.filepathCounter; i++) {
                         if (i%2 == 0) DrawRectangle(0, 85 + 40*i, screenWidth, 40, Fade(LIGHTGRAY, 0.5f));
                         else DrawRectangle(0, 85 + 40*i, screenWidth, 40, Fade(LIGHTGRAY, 0.3f));
-                        DrawText(filePaths[i], 120, 100 + 40*i, 10, GRAY);
+                        DrawText(fh.filepaths[i], 120, 100 + 40*i, 10, GRAY);
                     }
-                    DrawText("Drop new files...", 100, 110 + 40*filePathCounter, 20, DARKGRAY);
+                    DrawText("Drop new files...", 100, 110 + 40*(fh.filepathCounter), 20, DARKGRAY);
                 }
                 break;
 
@@ -164,13 +162,13 @@ int launchUIEventLoop() {
                 ClearBackground(LIGHTGRAY);
                 BeginMode2D(camera);
 
-                    MapType* currMap = &maps[currentFile];             
+                    MapType* currMap = &fh.maps[currentFile];             
                     for (int i = 0; i < MAP_SIZE; i++) {
                         for (int j = 0; j < MAP_SIZE; j++) {
                             uint32_t b = (*currMap)[i][j];
                             Color recColor;
-                            recColor.r = (b >> 16) & 0xFF;
-                            recColor.g = (b >> 8) & 0xFF;
+                            recColor.r = b & 0xFF;
+                            recColor.g = b & 0xFF;
                             recColor.b = b & 0xFF;
                             recColor.a = 255; 
                             DrawRectangle(i + TILE_SIZE, j + TILE_SIZE, TILE_SIZE, TILE_SIZE, recColor);
@@ -199,14 +197,47 @@ int launchUIEventLoop() {
         EndDrawing();
     }
 
-    // De-Initialization ========================
-    for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
-        RL_FREE(filePaths[i]);
-    }
-
+    // De-Initialization ========================================================
+    FreeFilesHandler(&fh);
+    
+    // End ======================================================================
     CloseWindow();
-
-    // End ======================================
     return 0;
+}
+
+// Implementation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+void InitFileHandler(FilesHandler* fh) {
+    fh->filepathCounter = 0;
+    for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
+        // Allocate space for the required file paths
+        fh->filepaths[i] = (char *)RL_CALLOC(MAX_FILEPATH_SIZE, 1);
+    }
+    for (int mapIdx = 0; mapIdx < MAX_FILEPATH_RECORDED; mapIdx++) {
+        for (int i=0; i < MAP_SIZE; i++) {
+            for (int j=0; j < MAP_SIZE; j++) {
+                fh->maps[mapIdx][i][j] = 0;
+                fh->originalMaps[mapIdx][i][j] = 0;
+            }
+        }
+    }
+}
+
+void ResetFilesHandler(FilesHandler* fh) {
+    fh->filepathCounter = 0;
+    for (int mapIdx = 0; mapIdx < MAX_FILEPATH_RECORDED; mapIdx++) {
+        for (int i=0; i < MAP_SIZE; i++) {
+            for (int j=0; j < MAP_SIZE; j++) {
+                fh->maps[mapIdx][i][j] = 0;
+                fh->originalMaps[mapIdx][i][j] = 0;
+            }
+        }
+    }
+}
+
+void FreeFilesHandler(FilesHandler* fh) {
+    for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
+        RL_FREE(fh->filepaths[i]);
+    }
 }
 
