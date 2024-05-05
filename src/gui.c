@@ -20,6 +20,7 @@ typedef enum UIScreen {
 #define MAX_FILEPATH_RECORDED   1
 #define MAX_FILEPATH_SIZE       2048
 typedef struct {
+    int currentFile;
     int filepathCounter;
     char* filepaths[MAX_FILEPATH_RECORDED];
     MapType maps[MAX_FILEPATH_RECORDED];
@@ -45,12 +46,9 @@ int launchUIEventLoop() {
     InitWindow(screenWidth, screenHeight, "Bustelo");
     SetTargetFPS(60);
     
-    // Select file page ------------------------
     FilesHandler fh;
     InitFileHandler(&fh);
 
-    // Viewer page ------------------------------
-    int currentFile = 0;
     Camera2D camera = { 0 };
     camera.zoom = 1.0f;
     int frameCounter = 0;
@@ -91,7 +89,7 @@ int launchUIEventLoop() {
                 for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
                     printf("[INFO] Processing: %s\n", fh.filepaths[i]);
                     fillMap(fh.filepaths[i], &(fh.maps[i]));
-                    normaliseMap(&(fh.maps[currentFile]), 1);  // TODO: Introduce settings
+                    normaliseMap(&(fh.maps[fh->currentFile]), 1);  // TODO: Introduce settings
                 }
                 currentScreen = VIEWER;
 
@@ -162,7 +160,7 @@ int launchUIEventLoop() {
                 ClearBackground(LIGHTGRAY);
                 BeginMode2D(camera);
 
-                    MapType* currMap = &fh.maps[currentFile];             
+                    MapType* currMap = &fh.maps[fh->currentFile];             
                     for (int i = 0; i < MAP_SIZE; i++) {
                         for (int j = 0; j < MAP_SIZE; j++) {
                             uint32_t b = (*currMap)[i][j];
@@ -208,6 +206,7 @@ int launchUIEventLoop() {
 // Implementation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 void InitFileHandler(FilesHandler* fh) {
+    fh->currentFile = 0;
     fh->filepathCounter = 0;
     for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
         // Allocate space for the required file paths
@@ -224,6 +223,7 @@ void InitFileHandler(FilesHandler* fh) {
 }
 
 void ResetFilesHandler(FilesHandler* fh) {
+    fh->currentFile = 0;
     fh->filepathCounter = 0;
     for (int mapIdx = 0; mapIdx < MAX_FILEPATH_RECORDED; mapIdx++) {
         for (int i=0; i < MAP_SIZE; i++) {
