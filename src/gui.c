@@ -8,7 +8,6 @@
 #include "raylib.h"
 #include "rlgl.h"
 #include "raymath.h"
-#include "logger.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -54,7 +53,6 @@ int launchUIEventLoop() {
     AppView currentView = MAIN_MENU;
     const int screenWidth = 800;
     const int screenHeight = 650;
-    SetTraceLogCallback(RaylibLogger);
     InitWindow(screenWidth, screenHeight, "Bustelo");
     SetTargetFPS(60);
 
@@ -213,7 +211,8 @@ int launchUIEventLoop() {
                 ClearBackground(LIGHTGRAY);
                 BeginMode3D(camera3D);
 
-                    // Point Cloud - will kill all performance :( 255**3 points
+                    // Point Cloud - will kill all performance 255**3 points
+                    // TODO NEXT: Figure out the point cloud 
                     Map3DType* currMap3D = fh.maps3D[fh.currentFile];
                     for (int i = 0; i < MAP_SIZE; i++) {
                         for (int j = 0; j < MAP_SIZE; j++) {
@@ -223,12 +222,14 @@ int launchUIEventLoop() {
                                 point.y = j;
                                 point.z = k;
                                 uint32_t b = (*currMap3D)[i][j][k];
-                                Color color;
-                                color.r = b & 0xFF;
-                                color.g = b & 0xFF;
-                                color.b = b & 0xFF;
-                                color.a = 255; 
-                                DrawPoint3D(point, color);
+                                if (b > 300) {
+                                    Color color;
+                                    color.r = b & 0xFF;
+                                    color.g = b & 0xFF;
+                                    color.b = b & 0xFF;
+                                    color.a = 255; 
+                                    DrawPoint3D(point, color);
+                                }
 
                             }
                         }
