@@ -1,9 +1,17 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+* UI for Dynamic Binary Visualization 
+* - 2D View
+* - 3D View (Work in Progress)
+*
+* FYI: This is unfinished Software, it's an excuse to try Raylib :)
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include "raylib.h"
 #include "rlgl.h"
 #include "raymath.h"
 #include "logger.h"
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include "molido.h"
 
 // App Screens
@@ -11,9 +19,10 @@ typedef enum UIScreen {
     MAIN_MENU,
     SETTINGS,
     PROCESSOR,
-    VIEWER,
+    VIEWER_2D,
+    VIEWER_3D,
     ERROR_PAGE
-} GameScreen;
+} AppView;
 
 
 // Files Handler ================================================================
@@ -23,44 +32,55 @@ typedef struct {
     int currentFile;
     int filepathCounter;
     char* filepaths[MAX_FILEPATH_RECORDED];
-    MapType maps[MAX_FILEPATH_RECORDED];
-    MapType originalMaps[MAX_FILEPATH_RECORDED];
+    MapType maps[MAX_FILEPATH_RECORDED];               // With transformation
+    MapType originalMaps[MAX_FILEPATH_RECORDED];       // Heavy to computer
+    Map3DType *maps3D[MAX_FILEPATH_RECORDED];          // With transformation
+    Map3DType *originalMaps3D[MAX_FILEPATH_RECORDED];  // Heavy to computer
 } FilesHandler;
 
 // Declaration of functions
 void InitFileHandler(FilesHandler* fh);
 void ResetFilesHandler(FilesHandler* fh);
 void FreeFilesHandler(FilesHandler* fh);
-
+void ProcessFilesHandler(FilesHandler* fh);
 // =============================================================================
+
 #define TILE_SIZE 50
 
 
 int launchUIEventLoop() {
 
     // Initialization ==========================================================
-    GameScreen currentScreen = MAIN_MENU;
+    AppView currentView = MAIN_MENU;
     const int screenWidth = 800;
     const int screenHeight = 650;
     SetTraceLogCallback(RaylibLogger);
     InitWindow(screenWidth, screenHeight, "Bustelo");
     SetTargetFPS(60);
-    
+
     FilesHandler fh;
     InitFileHandler(&fh);
 
+    // VIEWE 2D
     Camera2D camera = { 0 };
     camera.zoom = 1.0f;
-    int frameCounter = 0;
 
-    // Error page -------------------------------
+    // VIEWE 3D
+    Camera camera3D = { 0 };
+    camera3D.position = (Vector3){ 16.0f, 16.0f, 16.0f }; // Position
+    camera3D.target = (Vector3){ 0.0f, 0.0f, 0.0f };      // Looking at point
+    camera3D.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Up vector (rotation towards target)
+    camera3D.fovy = 45.0f;                                // Field-of-view Y
+    camera3D.projection = CAMERA_PERSPECTIVE;             // Projection type
+
+    // Error page --------------------------------------------------------------
     char* errorMessage = "";
 
     // Main app loop ============================
     while (!WindowShouldClose()) {
 
-        // Update ===============================================================
-        switch(currentScreen) {
+        // Update ==============================================================
+        switch(currentView) {
             case MAIN_MENU:
                 if (IsFileDropped()) {
                     FilePathList droppedFiles = LoadDroppedFiles();
@@ -70,7 +90,7 @@ int launchUIEventLoop() {
                             TextCopy(fh.filepaths[offset + i], droppedFiles.paths[i]);
                             fh.filepathCounter++;
                         } else {
-                            currentScreen = ERROR_PAGE;
+                            currentView = ERROR_PAGE;
                             errorMessage = "Exceded the maximum number of file that can be processed";
                         }
                     }
@@ -78,27 +98,24 @@ int launchUIEventLoop() {
                 }
 
                 if (IsKeyPressed(KEY_ENTER) && fh.filepathCounter > 0) {
-                    currentScreen = PROCESSOR;
+                    currentView = PROCESSOR;
                 }
                 break;
 
             case PROCESSOR:
-                frameCounter++;
                 // WARN: Current implementation is blocking
-                // Action take almost no delay for now
-                for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
-                    printf("[INFO] Processing: %s\n", fh.filepaths[i]);
-                    fillMap(fh.filepaths[i], &(fh.maps[i]));
-                    normaliseMap(&(fh.maps[fh->currentFile]), 1);  // TODO: Introduce settings
-                }
-                currentScreen = VIEWER;
-
+                ProcessFilesHandler(&fh);
+                currentView = VIEWER_2D;
                 break;
 
-            case VIEWER:
+            case VIEWER_2D:
                 if (IsKeyPressed(KEY_Q)) {
                     ResetFilesHandler(&fh);
-                    currentScreen = MAIN_MENU;
+                    currentView = MAIN_MENU;
+                    break;
+                }
+                if (IsKeyPressed(KEY_C)) {
+                    currentView = VIEWER_3D;
                     break;
                 }
                 if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
@@ -118,11 +135,24 @@ int launchUIEventLoop() {
                 }
                 break;
 
+            case VIEWER_3D:
+                if (IsKeyPressed(KEY_Q)) {
+                    ResetFilesHandler(&fh);
+                    currentView = MAIN_MENU;
+                    break;
+                }
+                if (IsKeyPressed(KEY_Z)) {
+                    currentView = VIEWER_2D;
+                    break;
+                }
+                UpdateCamera(&camera3D, CAMERA_ORBITAL);
+                break;
+
             case ERROR_PAGE:
                 // TODO: Reset all states send to initial Menu
                 if (IsKeyPressed(KEY_ENTER)) {
                     ResetFilesHandler(&fh);
-                    currentScreen = MAIN_MENU;
+                    currentView = MAIN_MENU;
                 }
                 break;
 
@@ -132,7 +162,7 @@ int launchUIEventLoop() {
 
         // Draw Current Frame ==================================================
         BeginDrawing();
-        switch(currentScreen) {
+        switch(currentView) {
             case MAIN_MENU:
                 if (fh.filepathCounter > 0) {
                     DrawText("PRESS ENTER TO PROCESS THE FILES", 120, 220, 20, DARKGREEN);
@@ -156,11 +186,11 @@ int launchUIEventLoop() {
                 DrawText("Brewing", 20, 20, 20, BLACK);
                 break;
 
-            case VIEWER:
+            case VIEWER_2D:
                 ClearBackground(LIGHTGRAY);
                 BeginMode2D(camera);
 
-                    MapType* currMap = &fh.maps[fh->currentFile];             
+                    MapType* currMap = &fh.maps[fh.currentFile];
                     for (int i = 0; i < MAP_SIZE; i++) {
                         for (int j = 0; j < MAP_SIZE; j++) {
                             uint32_t b = (*currMap)[i][j];
@@ -174,7 +204,43 @@ int launchUIEventLoop() {
                     }
                     
                 EndMode2D();
-                DrawText("Mouse right button drag to move, mouse wheel to zoom", 10, 10, 20, WHITE);
+                DrawText("Mouse right button drag to move, mouse wheel to zoom", 10, 10, 20, BLACK);
+                DrawText("Z || C To swtich view mode", 10, 20, 20, BLACK);
+                DrawText("Q to quit", 10, 30, 20, BLACK);
+                break;
+
+            case VIEWER_3D:
+                ClearBackground(LIGHTGRAY);
+                BeginMode3D(camera3D);
+
+                    // Point Cloud - will kill all performance :( 255**3 points
+                    Map3DType* currMap3D = fh.maps3D[fh.currentFile];
+                    for (int i = 0; i < MAP_SIZE; i++) {
+                        for (int j = 0; j < MAP_SIZE; j++) {
+                            for (int k = 0; k < MAP_SIZE; k++) { 
+                                Vector3 point;
+                                point.x = i;
+                                point.y = j;
+                                point.z = k;
+                                uint32_t b = (*currMap3D)[i][j][k];
+                                Color color;
+                                color.r = b & 0xFF;
+                                color.g = b & 0xFF;
+                                color.b = b & 0xFF;
+                                color.a = 255; 
+                                DrawPoint3D(point, color);
+
+                            }
+                        }
+                    }
+                    
+                    // Ref
+                    DrawGrid(20, 1.0f);
+
+                EndMode3D();
+                DrawText("WORK IN PROGRES", 10, 10, 20, BLACK);
+                DrawText("Z || C To swtich view mode", 20, 10, 20, BLACK);
+                DrawText("Q to quit", 30, 10, 20, BLACK);
                 break;
 
             case ERROR_PAGE:
@@ -189,7 +255,7 @@ int launchUIEventLoop() {
 
             default:
                 ClearBackground(SKYBLUE);
-                DrawText("UnImplemented, come back later aligator", 20, 20, 20, BLACK);
+                DrawText("UnImplemented, come back later!", 20, 20, 20, BLACK);
                 break;
         }
         EndDrawing();
@@ -212,11 +278,28 @@ void InitFileHandler(FilesHandler* fh) {
         // Allocate space for the required file paths
         fh->filepaths[i] = (char *)RL_CALLOC(MAX_FILEPATH_SIZE, 1);
     }
+    for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
+        fh->maps3D[i] = malloc(MAP_SIZE * sizeof(int [MAP_SIZE][MAP_SIZE]));
+        if (fh->maps3D[i] == NULL) {
+            printf("[ERROR] Panik, can't allocate memory for maps3D\n");
+        }
+        fh->originalMaps3D[i] = malloc(MAP_SIZE * sizeof(int [MAP_SIZE][MAP_SIZE]));
+        if (fh->originalMaps3D[i] == NULL) {
+            printf("[ERROR] Panik, can't allocate memory for origialMaps3D\n");
+        }
+    }
+
     for (int mapIdx = 0; mapIdx < MAX_FILEPATH_RECORDED; mapIdx++) {
+        Map3DType* originalMaps3D = fh->originalMaps3D[mapIdx];
+        Map3DType* maps3D = fh->maps3D[mapIdx];
         for (int i=0; i < MAP_SIZE; i++) {
             for (int j=0; j < MAP_SIZE; j++) {
                 fh->maps[mapIdx][i][j] = 0;
                 fh->originalMaps[mapIdx][i][j] = 0;
+                for (int k=0; k < MAP_SIZE; k++) {
+                    (*maps3D)[i][j][k] = 0;
+                    (*originalMaps3D)[i][j][k] = 0;
+                }
             }
         }
     }
@@ -226,10 +309,16 @@ void ResetFilesHandler(FilesHandler* fh) {
     fh->currentFile = 0;
     fh->filepathCounter = 0;
     for (int mapIdx = 0; mapIdx < MAX_FILEPATH_RECORDED; mapIdx++) {
+        Map3DType* originalMaps3D = fh->originalMaps3D[mapIdx];
+        Map3DType* maps3D = fh->maps3D[mapIdx];
         for (int i=0; i < MAP_SIZE; i++) {
             for (int j=0; j < MAP_SIZE; j++) {
                 fh->maps[mapIdx][i][j] = 0;
                 fh->originalMaps[mapIdx][i][j] = 0;
+                for (int k=0; k < MAP_SIZE; k++) {
+                    (*maps3D)[i][j][k] = 0;
+                    (*originalMaps3D)[i][j][k] = 0;
+                }
             }
         }
     }
@@ -238,6 +327,21 @@ void ResetFilesHandler(FilesHandler* fh) {
 void FreeFilesHandler(FilesHandler* fh) {
     for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
         RL_FREE(fh->filepaths[i]);
+        free(fh->maps3D[i]);
+        free(fh->originalMaps3D[i]);
     }
 }
 
+void ProcessFilesHandler(FilesHandler* fh) {
+    for (int i = 0; i < MAX_FILEPATH_RECORDED; i++) {
+        printf("[INFO] Processing: %s\n", fh->filepaths[i]);
+        // 2D
+        fillMap(fh->filepaths[i], &(fh->maps[i]));
+        copyMap(&(fh->maps[i]), &(fh->originalMaps[i]));
+        normaliseMap(&(fh->maps[fh->currentFile]), 1);
+        // 3D
+        fillMap3D(fh->filepaths[i], fh->maps3D[i]);
+        copyMap3D(fh->maps3D[i], fh->originalMaps3D[i]);
+        normaliseMap3D(fh->maps3D[fh->currentFile], 1);
+    }
+}
