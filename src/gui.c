@@ -63,7 +63,7 @@ int launchUIEventLoop() {
 
     // VIEWE 2D
     Camera2D camera = { 0 };
-    camera.zoom = 1.0f;
+    camera.zoom = 1.75f;
 
     // VIEWE 3D
     Camera camera3D = { 0 };
@@ -183,7 +183,7 @@ int launchUIEventLoop() {
 
             case PROCESSOR:
                 ClearBackground(RAYWHITE);
-                DrawText("Brewing", 20, 20, 20, BLACK);
+                DrawText("Processing the files...", 20, 20, 20, BLACK);
                 break;
 
             case VIEWER_2D:
@@ -205,8 +205,8 @@ int launchUIEventLoop() {
                     
                 EndMode2D();
                 DrawText("Mouse right button drag to move, mouse wheel to zoom", 10, 10, 20, BLACK);
-                DrawText("Z || C To swtich view mode", 10, 20, 20, BLACK);
-                DrawText("Q to quit", 10, 30, 20, BLACK);
+                DrawText("Z || C To swtich view mode", 10, 30, 20, BLACK);
+                DrawText("Q to quit", 10, 50, 20, BLACK);
                 break;
 
             case VIEWER_3D:
@@ -239,8 +239,8 @@ int launchUIEventLoop() {
 
                 EndMode3D();
                 DrawText("WORK IN PROGRES", 10, 10, 20, BLACK);
-                DrawText("Z || C To swtich view mode", 20, 10, 20, BLACK);
-                DrawText("Q to quit", 30, 10, 20, BLACK);
+                DrawText("Z || C To swtich view mode", 10, 30, 20, BLACK);
+                DrawText("Q to quit", 10, 50, 20, BLACK);
                 break;
 
             case ERROR_PAGE:
