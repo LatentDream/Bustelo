@@ -42,9 +42,12 @@ void InitFileHandler(FilesHandler* fh);
 void ResetFilesHandler(FilesHandler* fh);
 void FreeFilesHandler(FilesHandler* fh);
 void ProcessFilesHandler(FilesHandler* fh);
+void MapValueToHeatmapColor(Color* color, int value);
 // =============================================================================
 
-#define TILE_SIZE 50
+
+#define TILE_SIZE           50   // 2D Viewer
+#define RENDER_THRESHOLD    10   // 2D Viewer Between 0 & 255
 
 
 int launchUIEventLoop() {
@@ -203,12 +206,12 @@ int launchUIEventLoop() {
                     
                 EndMode2D();
                 DrawText("Mouse right button drag to move, mouse wheel to zoom", 10, 10, 20, BLACK);
-                DrawText("Z || C To swtich view mode", 10, 30, 20, BLACK);
+                DrawText("C to swtich 3D mode", 10, 30, 20, BLACK);
                 DrawText("Q to quit", 10, 50, 20, BLACK);
                 break;
 
             case VIEWER_3D:
-                ClearBackground(LIGHTGRAY);
+                ClearBackground(BLACK);
                 BeginMode3D(camera3D);
 
                     // Point Cloud - will kill all performance 255**3 points
@@ -217,18 +220,17 @@ int launchUIEventLoop() {
                     for (int i = 0; i < MAP_SIZE; i++) {
                         for (int j = 0; j < MAP_SIZE; j++) {
                             for (int k = 0; k < MAP_SIZE; k++) { 
-                                Vector3 point;
-                                point.x = i;
-                                point.y = j;
-                                point.z = k;
                                 uint32_t b = (*currMap3D)[i][j][k];
-                                if (b > 300) {
+                                if (b > RENDER_THRESHOLD) {
+                                    Vector3 point;
+                                    // Between 0 and MAP_SIZE
+                                    point.x = (float)(i - MAP_SIZE/2)/20;
+                                    point.y = (float)(j - MAP_SIZE/2)/20;
+                                    point.z = (float)(k - MAP_SIZE/2)/20;
+
                                     Color color;
-                                    color.r = b & 0xFF;
-                                    color.g = b & 0xFF;
-                                    color.b = b & 0xFF;
-                                    color.a = 255; 
-                                    DrawPoint3D(point, color);
+                                    MapValueToHeatmapColor(&color, b);
+                                    DrawSphere(point, 0.05f, color);
                                 }
 
                             }
@@ -236,12 +238,12 @@ int launchUIEventLoop() {
                     }
                     
                     // Ref
-                    DrawGrid(20, 1.0f);
+                    // DrawGrid(20, 1.0f);
 
                 EndMode3D();
-                DrawText("WORK IN PROGRES", 10, 10, 20, BLACK);
-                DrawText("Z || C To swtich view mode", 10, 30, 20, BLACK);
-                DrawText("Q to quit", 10, 50, 20, BLACK);
+                DrawText("3D View", 10, 10, 20, WHITE);
+                DrawText("Z to switch to 2D mode", 10, 30, 20, WHITE);
+                DrawText("Q to quit", 10, 50, 20, WHITE);
                 break;
 
             case ERROR_PAGE:
@@ -345,4 +347,17 @@ void ProcessFilesHandler(FilesHandler* fh) {
         copyMap3D(fh->maps3D[i], fh->originalMaps3D[i]);
         normaliseMap3D(fh->maps3D[fh->currentFile], 1);
     }
+}
+
+void MapValueToHeatmapColor(Color* color, int b) {
+    if (b < 128) {
+        color->r = 0;        // Low intensity, more towards blue
+        color->g = 2 * b;
+        color->b = 255 - 2 * b;
+    } else {
+        color->r = 2 * (b - 128);  // Higher intensity, more towards red
+        color->g = 255 - 2 * (b - 128);
+        color->b = 0;
+    }
+    color->a = 255; // Alpha value
 }

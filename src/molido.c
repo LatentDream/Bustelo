@@ -1,5 +1,6 @@
 // molido.c
 #include "molido.h"
+#include "raylib.h"
 #include "stb_image_write.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -174,17 +175,22 @@ void normaliseMap3D(Map3DType* map, int isLogScale) {
             }
         }
     }
+    if (max == 0) {
+        max = 1;
+    }
     // Normalize the map
     for (int i = 0; i < MAP_SIZE; i++) {
         for (int j = 0; j < MAP_SIZE; j++) {
             for (int k = 0; k < MAP_SIZE; k++) {
-                float value;
-                if (isLogScale) {
-                    value = logf((float)(*map)[i][j][k]) / max;
-                } else {
-                    value = (float)(*map)[i][j][k] / max;
+                float value = (float)(*map)[i][j][k];
+                if (value != 0) {
+                    if (isLogScale) {
+                        value = logf((float)(*map)[i][j][k]) / max;
+                    } else {
+                        value = (*map)[i][j][k] / max;
+                    }
+                    (*map)[i][j][k] = value * 255;
                 }
-                (*map)[i][j][k] = value * 255;
             }
         }
     }
