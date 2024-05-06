@@ -8,37 +8,37 @@ Might never be useful, but great excuse to go back into C after 3 years.
 Bitmaps:
 
 <p float="left">
-  <img src="examples/bitmap_2D.png" width="200" />
-  <img src="examples/bitmap_3D.png" width="200" /> 
+  <img src="examples/bitmap_2D.PNG" width="200" />
+  <img src="examples/bitmap_3D.PNG" width="200" /> 
 </p>
 
 
 File with text:
 
 <p float="left">
-  <img src="examples/file_with_text_2D.png" width="200" />
-  <img src="examples/file_with_text_3D.png" width="200" /> 
+  <img src="examples/file_with_text_2D.PNG" width="200" />
+  <img src="examples/file_with_text_3D.PNG" width="200" /> 
 </p>
 
 x86 (Bustelo app on Windows):
 
 <p float="left">
-  <img src="examples/bustelo_x86_2D.png" width="200" />
-  <img src="examples/bustelo_x86_3D.png" width="200" /> 
+  <img src="examples/bustelo_x86_2D.PNG" width="200" />
+  <img src="examples/bustelo_x86_3D.PNG" width="200" /> 
 </p>
 
 WAV:
 
 <p float="left">
-  <img src="examples/wav_2D.png" width="200" />
-  <img src="examples/wav_3D.png" width="200" /> 
+  <img src="examples/wav_2D.PNG" width="200" />
+  <img src="examples/wav_3D.PNG" width="200" /> 
 </p>
 
 MP3:
 
 <p float="left">
-  <img src="examples/mp3_2D.png" width="200" />
-  <img src="examples/mp3_3D.png" width="200" /> 
+  <img src="examples/mp3_2D.PNG" width="200" />
+  <img src="examples/mp3_3D.PNG" width="200" /> 
 </p>
 
 ## Usage
