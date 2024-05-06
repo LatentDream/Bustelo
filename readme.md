@@ -4,17 +4,42 @@ CLI to help find the file type of a binary and visualize it.
 Might never be useful, but great excuse to go back into C after 3 years.
 
 ## Example
-Bitmap file:
 
-<img title="Bitmap" alt="Bitmap output" src="/examples/bmp.png">
+Bitmaps:
 
-x86 file:
+<p float="left">
+  <img src="example/bitmap_2D.png" width="200" />
+  <img src="example/bitmap_3D.png" width="200" /> 
+</p>
 
-<img title="x86" alt="x86 output" src="/examples/x86.png">
 
-PNF file:
+File with text:
 
-<img title="PNG" alt="png output" src="/examples/png.png">
+<p float="left">
+  <img src="example/file_with_text_2D.png" width="200" />
+  <img src="example/file_with_text_3D.png" width="200" /> 
+</p>
+
+x86 (Bustelo app on Windows):
+
+<p float="left">
+  <img src="example/bustelo_x86_2D.png" width="200" />
+  <img src="example/bustelo_x86_3D.png" width="200" /> 
+</p>
+
+WAV:
+
+<p float="left">
+  <img src="example/wav_2D.png" width="200" />
+  <img src="example/wav_3D.png" width="200" /> 
+</p>
+
+MP3:
+
+<p float="left">
+  <img src="example/mp3_2D.png" width="200" />
+  <img src="example/mp3_3D.png" width="200" /> 
+</p>
 
 ## Usage
 ```bash

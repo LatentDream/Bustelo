@@ -206,8 +206,8 @@ int launchUIEventLoop() {
                     
                 EndMode2D();
                 DrawText("Mouse right button drag to move, mouse wheel to zoom", 10, 10, 20, BLACK);
-                DrawText("C to swtich 3D mode", 10, 30, 20, BLACK);
-                DrawText("Q to quit", 10, 50, 20, BLACK);
+                DrawText("C to swtich 3D Mode", 10, 30, 20, BLACK);
+                DrawText("Q to go to Main Menu", 10, 50, 20, BLACK);
                 break;
 
             case VIEWER_3D:
@@ -236,14 +236,11 @@ int launchUIEventLoop() {
                             }
                         }
                     }
-                    
-                    // Ref
-                    // DrawGrid(20, 1.0f);
 
                 EndMode3D();
                 DrawText("3D View", 10, 10, 20, WHITE);
-                DrawText("Z to switch to 2D mode", 10, 30, 20, WHITE);
-                DrawText("Q to quit", 10, 50, 20, WHITE);
+                DrawText("Z to switch to 2D Mode", 10, 30, 20, WHITE);
+                DrawText("Q to go to Main Menu", 10, 50, 20, WHITE);
                 break;
 
             case ERROR_PAGE:
