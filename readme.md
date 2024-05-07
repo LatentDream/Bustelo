@@ -1,6 +1,8 @@
 # Dynamic Binary Visualization
 
-CLI to help find the file type of a binary and visualize it.
+**[WORk IN PROGRESS]** This is unfinished Software, see bellow on what's next.
+
+CLI & GUI tool to generate the representation of how the infomration is store in a file. This tool can allow to speed up the identification of the file format since it exist some general strcuture that are distinc on how the information is store in each file type.
 Might never be useful, but great excuse to go back into C after 3 years.
 
 ## Example
@@ -58,13 +60,20 @@ C:\w64devkit\w64devkit.exe
 mingw32-make
 ```
 
-Dev - Linux:
+**Dev - Linux**:
 Insall Raylib system wise
 ```bash
 make
 ```
 
+#### TODO:
+- Process the file in a separeted thread so the UI doesn't block
+- It can have so many patterns (like Bitmap files), that rendering all the points becomes CPU-intensive. (Still have to do some research on the mather) Two options:
+  - Pre-render the views since they won't change
+  - Or offload to GPU
+- Ultimate Goal: Port everything to webassembly and integrate it into a web page
+
 ## Ressources:
 - This repo contain my own implementation of Christopher Domas Talk: [Youtube](https://www.youtube.com/watch?v=C8--cXwuuFQ)
 - Project Template: [Misha's Makefile magic](https://github.com/KRMisha/Makefile)
-- Adapted for C for my own need
+  - Adapted for C for my own need
