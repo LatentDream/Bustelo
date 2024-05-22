@@ -56,7 +56,9 @@ WARNINGS = -Wall -Wpedantic -Wextra
 LDFLAGS =
 
 # Libraries to link
-LDLIBS = -lm -lraylib -lgdi32 -lwinmm
+LDLIBS = -lm -lraylib
+# Windows-specific libraries
+WINLIBS = -lraylib -lgdi32 -lwinmm
 
 # Target OS detection
 ifeq ($(OS),Windows_NT) # OS is a preexisting environment variable on Windows
@@ -81,6 +83,7 @@ ifeq ($(OS),windows)
 	INCLUDES +=
 	LDFLAGS +=
 	LDLIBS +=
+	WINLIBS +=
 
 	ifeq ($(win32),1)
 		# Windows 32-bit settings

@@ -23,7 +23,6 @@ typedef enum UIScreen {
     ERROR_PAGE
 } AppView;
 
-
 // Files Handler ================================================================
 #define MAX_FILEPATH_RECORDED   1
 #define MAX_FILEPATH_SIZE       2048
